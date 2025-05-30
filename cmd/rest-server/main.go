@@ -7,7 +7,6 @@ import (
 	"gomailapi2/api/rest"
 	"gomailapi2/internal/config"
 	"gomailapi2/internal/manager"
-	"gomailapi2/internal/notification"
 	"gomailapi2/internal/provider/token"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +24,7 @@ func main() {
 	log.Info().Msg("正在启动邮件服务器...")
 
 	// 初始化通知管理器
-	notificationManager := notification.NewNotificationManager()
+	notificationManager := manager.NewNotificationManager()
 	log.Info().Msg("通知管理器初始化完成")
 
 	// 初始化 IMAP 订阅管理器

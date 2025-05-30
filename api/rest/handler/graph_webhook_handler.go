@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"gomailapi2/internal/notification"
+	"gomailapi2/internal/manager"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -25,7 +25,7 @@ type NotificationCollection struct {
 }
 
 // HandleGraphWebhook 处理 graph webhook 通知
-func HandleGraphWebhook(nfManager *notification.NotificationManager) gin.HandlerFunc {
+func HandleGraphWebhook(nfManager *manager.NotificationManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Info().
 			Str("method", c.Request.Method).
@@ -72,7 +72,7 @@ func HandleGraphWebhook(nfManager *notification.NotificationManager) gin.Handler
 }
 
 // processNotification 处理单个通知
-func processNotification(nfData NotificationData, nfManager *notification.NotificationManager) {
+func processNotification(nfData NotificationData, nfManager *manager.NotificationManager) {
 	log.Info().
 		Str("subscriptionID", nfData.SubscriptionID).
 		Str("resourceID", nfData.ResourceData.ID).

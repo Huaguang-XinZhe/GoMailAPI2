@@ -1,4 +1,4 @@
-package notification
+package manager
 
 import (
 	"github.com/rs/zerolog/log"

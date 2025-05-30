@@ -35,7 +35,7 @@ type GetNewMailResponse struct {
 
 // SubscribeMailRequest 订阅 -> 获取新到的一封邮件
 type SubscribeMailRequest struct {
-	NewMailInfo   *types.MailInfo `json:"newMailInfo"`             // 新邮箱的信息
+	MailInfo      *types.MailInfo `json:"mailInfo"`                // 新邮箱的信息
 	RefreshNeeded bool            `json:"refreshNeeded,omitempty"` // 是否需要刷新 refreshToken
 }
 
