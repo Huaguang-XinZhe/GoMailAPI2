@@ -35,9 +35,8 @@ type GetNewMailResponse struct {
 
 // SubscribeMailRequest 订阅 -> 获取新到的一封邮件
 type SubscribeMailRequest struct {
-	NewMailInfo     *types.MailInfo `json:"newMailInfo"`               // 新邮箱的信息
-	PrevSubScribeID string          `json:"prevSubScribeID,omitempty"` // 之前邮箱的订阅 ID（用于切换）
-	RefreshNeeded   bool            `json:"refreshNeeded,omitempty"`   // 是否需要刷新 refreshToken
+	NewMailInfo   *types.MailInfo `json:"newMailInfo"`             // 新邮箱的信息
+	RefreshNeeded bool            `json:"refreshNeeded,omitempty"` // 是否需要刷新 refreshToken
 }
 
 // ! 响应结构可能不需要,因为是通过 SSE 返回

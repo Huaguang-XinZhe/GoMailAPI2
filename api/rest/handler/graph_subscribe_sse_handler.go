@@ -2,13 +2,10 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/notification"
 	"gomailapi2/internal/provider/token"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,23 +25,22 @@ const (
 // HandleGraphSubscribeSSE 使用 Server-Sent Events 的订阅处理器
 func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *notification.NotificationManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 设置 SSE headers
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+
 		var request dto.SubscribeMailRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
 			log.Error().Err(err).Msg("解析订阅请求失败")
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			sendSSEError(c, err.Error())
 			return
 		}
 
 		log.Info().
 			Str("email", request.NewMailInfo.Email).
-			Str("prevSubscribeID", request.PrevSubScribeID).
 			Bool("refreshNeeded", request.RefreshNeeded).
 			Msg("收到 SSE Graph 订阅请求")
-
-		// 设置 SSE headers
-		c.Header("Content-Type", "text/event-stream")
-		c.Header("Cache-Control", "no-cache")
-		c.Header("Connection", "keep-alive")
 
 		// 获取 token
 		var accessToken, refreshToken string
@@ -62,13 +58,6 @@ func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *noti
 			return
 		}
 
-		// 删除旧订阅（如果存在）
-		if request.PrevSubScribeID != "" {
-			if err := graph.DeleteSubscription(context.Background(), accessToken, request.PrevSubScribeID); err != nil {
-				log.Warn().Err(err).Str("subscriptionID", request.PrevSubScribeID).Msg("删除旧订阅失败")
-			}
-		}
-
 		// 创建新订阅
 		response, err := graph.CreateSubscription(context.Background(), accessToken, notificationURL)
 		if err != nil {
@@ -77,15 +66,22 @@ func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *noti
 			return
 		}
 
+		// 结束后，自动取消当前订阅
+		defer func() {
+			if err := graph.DeleteSubscription(context.Background(), accessToken, response.ID); err != nil {
+				log.Warn().Err(err).Str("subscriptionID", response.ID).Msg("删除订阅失败")
+			}
+		}()
+
 		log.Info().
 			Str("email", request.NewMailInfo.Email).
 			Str("subscriptionID", response.ID).
-			Int64("createdAt", time.Now().Unix()).
 			Msg("成功创建 Graph 订阅")
 
 		// 先发送订阅成功的消息
-		subscriptionSuccess := make(map[string]any)
-		subscriptionSuccess["subscriptionID"] = response.ID
+		subscriptionSuccess := gin.H{
+			"message": "订阅成功",
+		}
 
 		// 只有在需要刷新且 refreshToken 不为空时才添加 refreshToken 字段
 		if request.RefreshNeeded && refreshToken != "" {
@@ -136,10 +132,9 @@ func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *noti
 				sendSSEEvent(c, "email", email)
 
 				// 发送完成消息
-				completeMessage := map[string]any{
+				sendSSEEvent(c, "complete", gin.H{
 					"message": "邮件推送完成",
-				}
-				sendSSEEvent(c, "complete", completeMessage)
+				})
 				return
 
 			case <-timeout.C:
@@ -148,10 +143,9 @@ func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *noti
 					Str("email", request.NewMailInfo.Email).
 					Msg("SSE 等待邮件超时")
 
-				timeoutMessage := map[string]any{
+				sendSSEEvent(c, "timeout", gin.H{
 					"message": "等待邮件超时，订阅已过期",
-				}
-				sendSSEEvent(c, "timeout", timeoutMessage)
+				})
 				return
 
 			case <-c.Request.Context().Done():
@@ -163,27 +157,10 @@ func HandleGraphSubscribeSSE(tokenProvider *token.TokenProvider, nfManager *noti
 
 			case <-heartbeat.C:
 				// 发送心跳包保持连接活跃
-				heartbeatMessage := map[string]any{
+				sendSSEEvent(c, "heartbeat", gin.H{
 					"timestamp": time.Now().Unix(),
-				}
-				sendSSEEvent(c, "heartbeat", heartbeatMessage)
+				})
 			}
 		}
 	}
-}
-
-// sendSSEEvent 发送 SSE 事件（data 为 json 格式）
-func sendSSEEvent(c *gin.Context, event string, data any) {
-	jsonData, _ := json.Marshal(data)
-	fmt.Fprintf(c.Writer, "event: %s\ndata: %s\n\n", event, string(jsonData))
-	c.Writer.Flush()
-}
-
-// sendSSEError 发送 SSE 错误消息
-func sendSSEError(c *gin.Context, message string) {
-	errorData := map[string]any{
-		"type":    "error",
-		"message": message,
-	}
-	sendSSEEvent(c, "error", errorData)
 }

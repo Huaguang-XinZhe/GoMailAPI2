@@ -6,6 +6,7 @@ import (
 
 	"gomailapi2/api/rest"
 	"gomailapi2/internal/config"
+	"gomailapi2/internal/manager"
 	"gomailapi2/internal/notification"
 	"gomailapi2/internal/provider/token"
 
@@ -27,6 +28,10 @@ func main() {
 	notificationManager := notification.NewNotificationManager()
 	log.Info().Msg("通知管理器初始化完成")
 
+	// 初始化 IMAP 订阅管理器
+	imapManager := manager.NewImapSubscriptionManager()
+	log.Info().Msg("IMAP 订阅管理器初始化完成")
+
 	// 初始化 TokenProvider
 	tokenProvider, err := token.NewTokenProvider(cfg.Cache)
 	if err != nil {
@@ -45,7 +50,7 @@ func main() {
 	// mailService := &service.MailService{}
 
 	// 初始化路由
-	router := rest.SetupRouter(tokenProvider, notificationManager)
+	router := rest.SetupRouter(tokenProvider, notificationManager, imapManager)
 
 	// 启动服务器
 	address := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)

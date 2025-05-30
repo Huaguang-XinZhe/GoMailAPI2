@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"gomailapi2/internal/domain"
+	"gomailapi2/internal/utils"
 	"io"
 	"net/http"
 	"time"
@@ -233,28 +234,10 @@ func convertToEmail(emailData EmailData) *domain.Email {
 
 	return &domain.Email{
 		Subject: emailData.Subject,
-		From:    CleanEmailAddress(&emailData.From.EmailAddress),
-		To:      CleanEmailAddress(toRecipient),
+		From:    utils.CleanEmailAddress(&emailData.From.EmailAddress),
+		To:      utils.CleanEmailAddress(toRecipient),
 		Date:    emailData.ReceivedDateTime,
 		Text:    emailData.BodyPreview,
 		HTML:    emailData.Body.Content,
-	}
-}
-
-// CleanEmailAddress 清理邮件地址
-func CleanEmailAddress(emailAdress *domain.EmailAddress) *domain.EmailAddress {
-	var optName string
-	name := emailAdress.Name
-	address := emailAdress.Address
-
-	if name == address {
-		optName = ""
-	} else {
-		optName = name
-	}
-
-	return &domain.EmailAddress{
-		Name:    optName,
-		Address: address,
 	}
 }
