@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- 把 any 换成 any
+
+- 用 for range 代替传统的 for i

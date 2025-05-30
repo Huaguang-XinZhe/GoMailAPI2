@@ -1,0 +1,5 @@
+# 忽略 .idea 目录
+.idea/
+
+# 忽略 .vscode 目录
+.vscode/
