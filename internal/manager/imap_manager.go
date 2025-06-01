@@ -11,14 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// generateSubscriptionID 生成唯一的订阅 ID
-func generateSubscriptionID() string {
-	// 使用时间戳 + 随机数生成唯一 ID
-	timestamp := time.Now().UnixNano()
-	random := rand.Int63()
-	return fmt.Sprintf("imap_%d_%d", timestamp, random)
-}
-
 // ImapSubscription IMAP 订阅信息
 type ImapSubscription struct {
 	ID         string                     // 订阅 ID
@@ -158,4 +150,12 @@ func (m *ImapSubscriptionManager) StartSubscription(subscription *ImapSubscripti
 		Msg("开始监听新邮件...")
 
 	return nil
+}
+
+// generateSubscriptionID 生成唯一的订阅 ID
+func generateSubscriptionID() string {
+	// 使用时间戳 + 随机数生成唯一 ID
+	timestamp := time.Now().UnixNano()
+	random := rand.Int63()
+	return fmt.Sprintf("imap_%d_%d", timestamp, random)
 }

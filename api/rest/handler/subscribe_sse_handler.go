@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/client/imap/outlook"
@@ -14,8 +16,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// todo IP 自动化设置（初始化时设置，作为全局变量）
-var graphNotificationURL = "https://cd2c-2408-8948-2001-47a9-bd66-1a7e-8f31-8d34.ngrok-free.app/api/v1/graph/webhook"
+// SSE 订阅配置常量
+const (
+	SSETimeoutMinutes           = 3  // SSE 连接超时时间（分钟）
+	SSEHeartbeatIntervalSeconds = 60 // SSE 心跳间隔（秒）
+	// todo IP 自动化设置（初始化时设置，作为全局变量）
+	graphNotificationURL = "https://cd2c-2408-8948-2001-47a9-bd66-1a7e-8f31-8d34.ngrok-free.app/api/v1/graph/webhook"
+)
 
 // HandleUnifiedSubscribeSSE 统一的邮件订阅 SSE 处理器，支持 IMAP 和 Graph 协议
 func HandleUnifiedSubscribeSSE(
@@ -40,7 +47,7 @@ func HandleUnifiedSubscribeSSE(
 			Msg("收到统一订阅请求")
 
 		// 获取 token
-		accessToken, refreshToken, err := getTokens(tokenProvider, request)
+		accessToken, refreshToken, err := getTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
 		if err != nil {
 			log.Error().Err(err).Msg("获取 token 失败")
 			sendSSEError(c, err.Error())
@@ -70,11 +77,7 @@ func handleImapSubscription(
 	imapManager *manager.ImapSubscriptionManager,
 ) {
 	// 创建 IMAP 客户端
-	imapClient := outlook.NewOutlookImapClient(&outlook.Credentials{
-		Email:        request.MailInfo.Email,
-		ClientID:     request.MailInfo.ClientID,
-		RefreshToken: refreshToken,
-	}, accessToken)
+	imapClient := outlook.NewOutlookImapClient(mailInfoToCredentials(request.MailInfo), accessToken)
 
 	// 创建新订阅
 	subscription, err := imapManager.CreateSubscription(imapClient, request.MailInfo.Email)
@@ -288,4 +291,60 @@ func listenForGraphNotifications(
 			})
 		}
 	}
+}
+
+// sendSSEEvent 发送 SSE 事件（data 为 json 格式）
+func sendSSEEvent(c *gin.Context, event string, data any) {
+	jsonData, _ := json.Marshal(data)
+	fmt.Fprintf(c.Writer, "event: %s\ndata: %s\n\n", event, string(jsonData))
+	c.Writer.Flush()
+}
+
+// sendSSEError 发送 SSE 错误消息
+func sendSSEError(c *gin.Context, message string) {
+	sendSSEEvent(c, "error", gin.H{
+		"message": message,
+	})
+}
+
+// setupSSEHeaders 设置 SSE 响应头
+func setupSSEHeaders(c *gin.Context) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+}
+
+// parseSubscribeRequest 解析订阅请求
+func parseSubscribeRequest(c *gin.Context) (*dto.SubscribeMailRequest, error) {
+	var request dto.SubscribeMailRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Error().Err(err).Msg("解析订阅请求失败")
+		sendSSEError(c, err.Error())
+		return nil, err
+	}
+	return &request, nil
+}
+
+// sendSubscriptionSuccess 发送订阅成功消息
+func sendSubscriptionSuccess(c *gin.Context, refreshNeeded bool, refreshToken string) {
+	subscriptionSuccess := gin.H{
+		"message": "订阅成功",
+	}
+
+	// 只有在需要刷新且 refreshToken 不为空时才添加 refreshToken 字段
+	if refreshNeeded && refreshToken != "" {
+		subscriptionSuccess["refreshToken"] = refreshToken
+	}
+
+	sendSSEEvent(c, "subscription", subscriptionSuccess)
+}
+
+// createHeartbeatTicker 创建心跳定时器
+func createHeartbeatTicker() *time.Ticker {
+	return time.NewTicker(SSEHeartbeatIntervalSeconds * time.Second)
+}
+
+// createSSETimeout 创建 SSE 超时定时器
+func createSSETimeout() *time.Timer {
+	return time.NewTimer(SSETimeoutMinutes * time.Minute)
 }

@@ -130,6 +130,10 @@ func (c *CommonImapClient) FetchLatestEmail() (*domain.Email, error) {
 	return c.fetchLatestEmailFromFolder("inbox")
 }
 
+func (c *CommonImapClient) FetchLatestJunkEmail() (*domain.Email, error) {
+	return c.fetchLatestEmailFromFolder("junk")
+}
+
 // FetchEmailByID 根据邮件 ID 获取邮件详情【单独建立连接】
 func (c *CommonImapClient) FetchEmailByID(emailID string) (*domain.Email, error) {
 	// 检查是否已连接，如果没有连接则自动连接
@@ -453,6 +457,10 @@ func parseMail(message *imap.Message, section *imap.BodySectionName) (*domain.Em
 	var date string
 	var from, to *domain.EmailAddress
 	var subject string
+
+	// // 记录 ID
+	// messageID := header.Get("Message-ID")
+	// log.Printf("邮件 ID: %s", messageID)
 
 	if d, err := header.Date(); err != nil {
 		return nil, errors.New("获取邮件日期失败")
