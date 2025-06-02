@@ -17,7 +17,7 @@ func GenerateCacheKey(refreshToken string) string {
 }
 
 // CleanEmailAddress 清理邮件地址，支持 *mail.Address 和 *domain.EmailAddress
-func CleanEmailAddress(emailAddress any) *domain.EmailAddress {
+func CleanEmailAddress(emailAddress interface{}) *domain.EmailAddress {
 	var name, address string
 
 	switch addr := emailAddress.(type) {

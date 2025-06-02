@@ -38,21 +38,11 @@ func main() {
 	}
 	defer tokenProvider.Close()
 
-	// 初始化服务
-	// todo: 如果需要 TokenService，这里也需要初始化
-	// tokenService := service.NewTokenService(tokenProvider)
-	// imapService := service.NewIMAPService(tokenService)
-	// graphService := service.NewGraphService(tokenService)
-	// mailService := service.NewMailService(imapService, graphService)
-
-	// // 暂时先创建一个基本的 MailService，后续根据需要调整
-	// mailService := &service.MailService{}
-
 	// 初始化路由
 	router := rest.SetupRouter(tokenProvider, notificationManager, imapManager)
 
 	// 启动服务器
-	address := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
+	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	log.Info().Str("address", address).Msg("服务器启动中...")
 
 	if err := router.Run(address); err != nil {

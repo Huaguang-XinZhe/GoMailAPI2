@@ -84,7 +84,7 @@ go run cmd/mailserver/main.go cmd/mailserver/config.go
 
 ### 获取新邮件
 
-**POST** `/api/v1/mail/new`
+**POST** `/gomailapi2/mail/new`
 
 ```json
 {
@@ -99,7 +99,7 @@ go run cmd/mailserver/main.go cmd/mailserver/config.go
 
 ### 订阅邮件
 
-**POST** `/api/v1/mail/subscribe`
+**POST** `/gomailapi2/mail/subscribe`
 
 ```json
 {

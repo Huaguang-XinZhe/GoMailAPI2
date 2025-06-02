@@ -1,6 +1,7 @@
 server:
   host: "localhost"
-  port: "8080"
+  port: 8080
+  grpc_port: 50051
 
 # 缓存配置
 cache:

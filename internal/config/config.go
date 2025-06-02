@@ -8,8 +8,9 @@ import (
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	GrpcPort int    `mapstructure:"grpc_port"`
 }
 
 // RedisConfig Redis 配置
@@ -64,6 +65,7 @@ func LoadConfig() *Config {
 	// 设置默认值
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", "8080")
+	viper.SetDefault("server.grpc_port", "50051")
 
 	// 缓存默认值
 	viper.SetDefault("cache.type", "local")

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"gomailapi2/api/common"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/client/imap/outlook"
 	"gomailapi2/internal/provider/token"
@@ -83,7 +84,7 @@ func handleImapJunkMail(c *gin.Context, request *dto.GetNewJunkMailRequest, toke
 	}
 
 	// 创建 IMAP 客户端
-	imapClient := outlook.NewOutlookImapClient(mailInfoToCredentials(request.MailInfo), accessToken)
+	imapClient := outlook.NewOutlookImapClient(common.MailInfoToCredentials(request.MailInfo), accessToken)
 
 	// 获取垃圾邮件
 	email, err := imapClient.FetchLatestJunkEmail()

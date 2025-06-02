@@ -21,7 +21,7 @@ func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.Notifica
 	router.Use(gin.Recovery()) // 捕获 panic 并返回 500 错误
 
 	// API 路由
-	apiGroup := router.Group("/api/v1") // todo 这里要变一下了：mail-api
+	apiGroup := router.Group("gomailapi2")
 
 	// 统一邮件端点 - 推荐使用
 	{

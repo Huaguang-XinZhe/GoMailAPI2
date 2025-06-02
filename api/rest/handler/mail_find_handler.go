@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"gomailapi2/api/common"
 	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/client/imap/outlook"
@@ -92,7 +93,7 @@ func handleImapFindMail(c *gin.Context, request *dto.FindMailRequest, tokenProvi
 	}
 
 	// 创建 IMAP 客户端
-	imapClient := outlook.NewOutlookImapClient(mailInfoToCredentials(request.MailInfo), accessToken)
+	imapClient := outlook.NewOutlookImapClient(common.MailInfoToCredentials(request.MailInfo), accessToken)
 
 	// 根据邮件 ID 查找邮件
 	email, err := imapClient.FetchEmailByID(emailID)

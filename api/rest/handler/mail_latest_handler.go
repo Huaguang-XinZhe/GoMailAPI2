@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"gomailapi2/api/common"
 	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/client/imap/outlook"
@@ -54,7 +55,7 @@ func HandleUnifiedLatestMail(tokenProvider *token.TokenProvider) gin.HandlerFunc
 // handleGraphLatestMail 处理 Graph API 协议的最新邮件获取
 func handleGraphLatestMail(c *gin.Context, request *dto.GetNewMailRequest, tokenProvider *token.TokenProvider) {
 	// 获取访问令牌
-	accessToken, refreshToken, err := getTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
+	accessToken, refreshToken, err := common.GetTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
 	if err != nil {
 		log.Error().Err(err).Str("email", request.MailInfo.Email).Msg("获取 Graph API 访问令牌失败")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -78,7 +79,7 @@ func handleGraphLatestMail(c *gin.Context, request *dto.GetNewMailRequest, token
 // handleImapLatestMail 处理 IMAP 协议的最新邮件获取
 func handleImapLatestMail(c *gin.Context, request *dto.GetNewMailRequest, tokenProvider *token.TokenProvider) {
 	// 获取令牌
-	accessToken, refreshToken, err := getTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
+	accessToken, refreshToken, err := common.GetTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
 	if err != nil {
 		log.Error().Err(err).Str("email", request.MailInfo.Email).Msg("获取 IMAP 访问令牌失败")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -86,7 +87,7 @@ func handleImapLatestMail(c *gin.Context, request *dto.GetNewMailRequest, tokenP
 	}
 
 	// 创建 IMAP 客户端
-	imapClient := outlook.NewOutlookImapClient(mailInfoToCredentials(request.MailInfo), accessToken)
+	imapClient := outlook.NewOutlookImapClient(common.MailInfoToCredentials(request.MailInfo), accessToken)
 
 	// 获取最新邮件
 	email, err := imapClient.FetchLatestEmail()

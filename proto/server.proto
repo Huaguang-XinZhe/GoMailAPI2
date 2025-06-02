@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+option go_package = "gomailapi2/proto/pb";
+
+// 邮件服务定义
+service MailService {
+  // 获取最新邮件
+  rpc GetLatestMail(GetNewMailRequest) returns (GetNewMailResponse);
+  
+  // 查找特定邮件
+  rpc FindMail(FindMailRequest) returns (FindMailResponse);
+  
+  // 获取垃圾邮件
+  rpc GetJunkMail(GetNewJunkMailRequest) returns (GetNewJunkMailResponse);
+  
+  // 邮件订阅流（SSE 替代方案）
+  rpc SubscribeMail(SubscribeMailRequest) returns (stream MailEvent);
+  
+  // 刷新 Token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  
+  // 批量刷新 Token
+  rpc BatchRefreshToken(BatchRefreshTokenRequest) returns (BatchRefreshTokenResponse);
+}
+
+// 服务提供商类型
+enum ServiceProvider {
+  MICROSOFT = 0;
+  GOOGLE = 1;
+}
+
+// 协议类型
+enum ProtocolType {
+  IMAP = 0;
+  GRAPH = 1;
+}
+
+// 邮件信息（对应 types.MailInfo）
+message MailInfo {
+  string email = 1;
+  string client_id = 2;
+  string refresh_token = 3;
+  ProtocolType proto_type = 4;
+  ServiceProvider service_provider = 5;
+}
+
+// 邮件地址（对应 domain.EmailAddress）
+message EmailAddress {
+  string name = 1;
+  string address = 2;
+}
+
+// 邮件实体（对应 domain.Email）
+message Email {
+  string subject = 1;
+  EmailAddress from = 2;
+  EmailAddress to = 3;
+  string date = 4;
+  string text = 5;
+  string html = 6;
+}
+
+// 获取最新邮件请求（对应 dto.GetNewMailRequest）
+message GetNewMailRequest {
+  MailInfo mail_info = 1;
+  bool refresh_needed = 2;
+}
+
+// 获取最新邮件响应
+message GetNewMailResponse {
+  Email email = 1;
+  optional string refresh_token = 2; // 当 refresh_needed=true 时返回
+}
+
+// 查找邮件请求（对应 dto.FindMailRequest）
+message FindMailRequest {
+  MailInfo mail_info = 1;
+  string email_id = 2; // 从 URL 路径参数获取
+}
+
+// 查找邮件响应
+message FindMailResponse {
+  Email email = 1;
+}
+
+// 获取垃圾邮件请求（对应 dto.GetNewJunkMailRequest）
+message GetNewJunkMailRequest {
+  MailInfo mail_info = 1;
+}
+
+// 获取垃圾邮件响应
+message GetNewJunkMailResponse {
+  Email email = 1;
+}
+
+// 邮件订阅请求（对应 dto.SubscribeMailRequest）
+message SubscribeMailRequest {
+  MailInfo mail_info = 1;
+  bool refresh_needed = 2;
+}
+
+// 邮件事件（SSE 流事件）- 简化版本
+message MailEvent {
+  string event_type = 1; // "connected", "email", "heartbeat", "error", "closed"
+  optional Email email = 2; // 仅当 event_type="email" 时使用
+  optional string message = 3; // 用于 connected/heartbeat/error/closed 消息
+  optional string refresh_token = 4; // 仅当连接成功且需要刷新时返回
+}
+
+// 刷新 Token 请求（对应 dto.RefreshTokenRequest）
+message RefreshTokenRequest {
+  MailInfo mail_info = 1;
+}
+
+// 刷新 Token 响应
+message RefreshTokenResponse {
+  string new_refresh_token = 1;
+}
+
+// 批量刷新 Token 请求（对应 dto.BatchRefreshTokenRequest）
+message BatchRefreshTokenRequest {
+  repeated MailInfo mail_infos = 1;
+}
+
+// 批量刷新结果项（对应 dto.BatchRefreshResult）
+message BatchRefreshResult {
+  string email = 1;
+  string new_refresh_token = 2;
+  optional string error = 3; // 只有失败时才设置
+}
+
+// 批量刷新 Token 响应（对应 dto.BatchRefreshTokenData）
+message BatchRefreshTokenResponse {
+  int32 success_count = 1;
+  int32 fail_count = 2;
+  repeated BatchRefreshResult results = 3;
+}

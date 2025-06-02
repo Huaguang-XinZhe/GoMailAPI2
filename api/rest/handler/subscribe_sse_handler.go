@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gomailapi2/api/common"
 	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/client/graph"
 	"gomailapi2/internal/client/imap/outlook"
@@ -14,14 +15,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-)
-
-// SSE 订阅配置常量
-const (
-	SSETimeoutMinutes           = 3  // SSE 连接超时时间（分钟）
-	SSEHeartbeatIntervalSeconds = 60 // SSE 心跳间隔（秒）
-	// todo IP 自动化设置（初始化时设置，作为全局变量）
-	graphNotificationURL = "https://cd2c-2408-8948-2001-47a9-bd66-1a7e-8f31-8d34.ngrok-free.app/api/v1/graph/webhook"
 )
 
 // HandleUnifiedSubscribeSSE 统一的邮件订阅 SSE 处理器，支持 IMAP 和 Graph 协议
@@ -47,7 +40,7 @@ func HandleUnifiedSubscribeSSE(
 			Msg("收到统一订阅请求")
 
 		// 获取 token
-		accessToken, refreshToken, err := getTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
+		accessToken, refreshToken, err := common.GetTokens(tokenProvider, request.RefreshNeeded, request.MailInfo)
 		if err != nil {
 			log.Error().Err(err).Msg("获取 token 失败")
 			sendSSEError(c, err.Error())
@@ -77,7 +70,7 @@ func handleImapSubscription(
 	imapManager *manager.ImapSubscriptionManager,
 ) {
 	// 创建 IMAP 客户端
-	imapClient := outlook.NewOutlookImapClient(mailInfoToCredentials(request.MailInfo), accessToken)
+	imapClient := outlook.NewOutlookImapClient(common.MailInfoToCredentials(request.MailInfo), accessToken)
 
 	// 创建新订阅
 	subscription, err := imapManager.CreateSubscription(imapClient, request.MailInfo.Email)
@@ -123,7 +116,7 @@ func handleGraphSubscription(
 	nfManager *manager.NotificationManager,
 ) {
 	// 创建新订阅
-	response, err := graph.CreateSubscription(context.Background(), accessToken, graphNotificationURL)
+	response, err := graph.CreateSubscription(context.Background(), accessToken, common.GraphNotificationURL)
 	if err != nil {
 		log.Error().Err(err).Str("email", request.MailInfo.Email).Msg("创建 Graph 订阅失败")
 		sendSSEError(c, "创建订阅失败: "+err.Error())
@@ -341,10 +334,10 @@ func sendSubscriptionSuccess(c *gin.Context, refreshNeeded bool, refreshToken st
 
 // createHeartbeatTicker 创建心跳定时器
 func createHeartbeatTicker() *time.Ticker {
-	return time.NewTicker(SSEHeartbeatIntervalSeconds * time.Second)
+	return time.NewTicker(common.HeartbeatIntervalSeconds * time.Second)
 }
 
 // createSSETimeout 创建 SSE 超时定时器
 func createSSETimeout() *time.Timer {
-	return time.NewTimer(SSETimeoutMinutes * time.Minute)
+	return time.NewTimer(common.TimeoutMinutes * time.Minute)
 }
