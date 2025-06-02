@@ -35,6 +35,15 @@ func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.Notifica
 		apiGroup.POST("/subscribe-sse", handler.HandleUnifiedSubscribeSSE(tokenProvider, nfManager, imapManager))
 	}
 
+	// Token 相关端点
+	tokenGroup := apiGroup.Group("/token")
+	{
+		// 刷新单个 Token
+		tokenGroup.POST("/refresh", handler.HandleRefreshToken(tokenProvider))
+		// 批量刷新 Token
+		tokenGroup.POST("/batch/refresh", handler.HandleBatchRefreshToken(tokenProvider))
+	}
+
 	// Graph API 相关路由
 	graphGroup := apiGroup.Group("/graph")
 	{
