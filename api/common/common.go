@@ -2,6 +2,7 @@ package common
 
 import (
 	"gomailapi2/internal/client/imap/outlook"
+	"gomailapi2/internal/config"
 	"gomailapi2/internal/provider/token"
 	"gomailapi2/internal/types"
 )
@@ -10,9 +11,17 @@ import (
 const (
 	TimeoutMinutes           = 3  // 连接超时时间（分钟）
 	HeartbeatIntervalSeconds = 60 // 心跳间隔（秒）
-	// todo IP 自动化设置（初始化时设置，作为全局变量）
-	GraphNotificationURL = "https://8e77-2408-8948-2011-5678-a96a-ba3e-7315-342.ngrok-free.app/gomailapi2/graph/webhook"
 )
+
+// 全局变量
+var (
+	GraphNotificationURL string // Graph webhook 通知 URL
+)
+
+// InitGraphNotificationURL 初始化 Graph webhook 通知 URL
+func InitGraphNotificationURL(cfg *config.WebhookConfig) {
+	GraphNotificationURL = cfg.BaseURL + "/gomailapi2/graph/webhook"
+}
 
 // GetTokens 获取访问令牌和刷新令牌
 func GetTokens(tokenProvider *token.TokenProvider, refreshNeeded bool, mailInfo *types.MailInfo) (string, string, error) {

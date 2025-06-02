@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"gomailapi2/api/common"
 	"gomailapi2/api/grpc"
 	"gomailapi2/api/rest"
 	"gomailapi2/internal/config"
@@ -25,6 +26,9 @@ func main() {
 
 	// 加载配置
 	cfg := config.LoadConfig()
+
+	// 初始化全局配置
+	common.InitGraphNotificationURL(&cfg.Webhook)
 
 	log.Info().Msg("启动统一邮件服务器 (gRPC + REST)")
 

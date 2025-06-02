@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"gomailapi2/api/common"
 	"gomailapi2/api/rest"
 	"gomailapi2/internal/config"
 	"gomailapi2/internal/manager"
@@ -17,6 +18,9 @@ import (
 func main() {
 	// 加载配置
 	cfg := config.LoadConfig()
+
+	// 初始化全局配置
+	common.InitGraphNotificationURL(&cfg.Webhook)
 
 	// 初始化日志
 	initLogger(cfg.Log.Level)

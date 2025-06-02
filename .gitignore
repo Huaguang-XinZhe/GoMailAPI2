@@ -3,3 +3,9 @@
 
 # 忽略 .vscode 目录
 .vscode/
+
+# 忽略 docs 目录
+docs/
+
+# 忽略 .env 文件
+.env
