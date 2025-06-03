@@ -6,7 +6,7 @@ services:
       - "50051:50051"
     volumes:
       - ./config.yaml:/root/config.yaml:ro # 挂载配置文件，只读
-    env_file:
+    environment:
       - GOMAILAPI_WEBHOOK_BASE_URL=https://372151.xyz
       - GOMAILAPI_ENV=production
     # depends_on:
