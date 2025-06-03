@@ -16,8 +16,15 @@ RUN go mod download
 # 复制源代码（排除配置文件）
 COPY . .
 
-# 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o unified-server ./cmd/unified-server
+# 构建应用 - 添加资源限制和优化参数
+RUN CGO_ENABLED=0 GOOS=linux GOMAXPROCS=2 go build \
+    -a \
+    -installsuffix cgo \
+    -ldflags="-w -s" \
+    -gcflags="-N -l" \
+    -p 2 \
+    -o unified-server \
+    ./cmd/unified-server
 
 # 运行阶段
 FROM alpine:latest
