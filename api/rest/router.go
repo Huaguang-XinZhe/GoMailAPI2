@@ -5,12 +5,15 @@ import (
 	"gomailapi2/internal/manager"
 	"gomailapi2/internal/provider/token"
 
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
 func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.NotificationManager, imapManager *manager.ImapSubscriptionManager) *gin.Engine {
-	if !gin.IsDebugging() { // ? gin Mode 是什么？
+	// 检查环境变量，如果设置了 GIN_MODE=release 或者 GOMAILAPI_ENV=production，则设置为 release 模式
+	if os.Getenv("GIN_MODE") == "release" || os.Getenv("GOMAILAPI_ENV") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

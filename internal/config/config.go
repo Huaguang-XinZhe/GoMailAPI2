@@ -2,6 +2,8 @@ package config
 
 import (
 	"log"
+	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -61,6 +63,12 @@ type Config struct {
 	Webhook WebhookConfig `mapstructure:"webhook"`
 }
 
+// IsProduction 检查是否为生产环境
+func (c *Config) IsProduction() bool {
+	env := strings.ToLower(os.Getenv("GOMAILAPI_ENV"))
+	return env == "production" || env == "prod"
+}
+
 // LoadConfig 加载配置
 func LoadConfig() *Config {
 	viper.SetConfigName("config")
@@ -72,24 +80,38 @@ func LoadConfig() *Config {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("GOMAILAPI")
 
-	// 设置默认值
-	viper.SetDefault("server.host", "localhost")
+	// 环境变量映射
+	viper.BindEnv("server.host", "GOMAILAPI_SERVER_HOST")
+	viper.BindEnv("server.port", "GOMAILAPI_SERVER_PORT")
+	viper.BindEnv("server.grpc_port", "GOMAILAPI_GRPC_PORT")
+	viper.BindEnv("cache.type", "GOMAILAPI_CACHE_TYPE")
+	viper.BindEnv("cache.redis.host", "GOMAILAPI_REDIS_HOST")
+	viper.BindEnv("cache.redis.port", "GOMAILAPI_REDIS_PORT")
+	viper.BindEnv("cache.redis.password", "GOMAILAPI_REDIS_PASSWORD")
+	viper.BindEnv("log.level", "GOMAILAPI_LOG_LEVEL")
+	viper.BindEnv("webhook.base_url", "GOMAILAPI_WEBHOOK_BASE_URL")
+
+	// 根据环境设置默认值
+	isProduction := strings.ToLower(os.Getenv("GOMAILAPI_ENV")) == "production"
+
+	if isProduction {
+		// 生产环境默认值
+		viper.SetDefault("server.host", "0.0.0.0")
+	} else {
+		// 开发环境默认值
+		viper.SetDefault("server.host", "localhost")
+	}
+
 	viper.SetDefault("server.port", "8080")
 	viper.SetDefault("server.grpc_port", "50051")
 
 	// 缓存默认值
 	viper.SetDefault("cache.type", "local")
 	viper.SetDefault("cache.local.size", 1000)
-	// viper.SetDefault("cache.local.l1_expiration", "50m")
-	viper.SetDefault("cache.redis.enabled", false)
 	viper.SetDefault("cache.redis.host", "localhost")
 	viper.SetDefault("cache.redis.port", "6379")
 	viper.SetDefault("cache.redis.db", 0)
-
 	viper.SetDefault("log.level", "info")
-
-	// webhook 默认值（开发环境使用 ngrok）
-	viper.SetDefault("webhook.base_url", "https://8e77-2408-8948-2011-5678-a96a-ba3e-7315-342.ngrok-free.app")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Config file not found, using defaults: %v", err)

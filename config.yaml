@@ -1,5 +1,5 @@
 server:
-  host: "localhost"
+  host: "0.0.0.0"
   port: 8080
   grpc_port: 50051
 
@@ -19,11 +19,11 @@ cache:
     db: 0
 
 log:
-  level: "debug"
+  level: "info"
 
 # Webhook 配置
 webhook:
   # 开发环境使用 ngrok
-  base_url: "https://8e77-2408-8948-2011-5678-a96a-ba3e-7315-342.ngrok-free.app"
+  # base_url: "https://8e77-2408-8948-2011-5678-a96a-ba3e-7315-342.ngrok-free.app"
   # 生产环境示例：
-  # base_url: "https://yourdomain.com"
+  base_url: "https://yourdomain.com"

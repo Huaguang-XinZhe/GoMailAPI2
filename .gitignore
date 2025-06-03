@@ -9,3 +9,8 @@ docs/
 
 # 忽略 .env 文件
 .env
+env.*
+
+# 环境变量文件
+.env.local
+.env.production

@@ -21,11 +21,11 @@ import (
 )
 
 func main() {
-	// 设置日志
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
-	// 加载配置
+	// 加载配置（先加载配置再设置日志）
 	cfg := config.LoadConfig()
+
+	// 根据配置设置日志级别和格式
+	setupLogger(cfg)
 
 	// 初始化全局配置
 	common.InitGraphNotificationURL(&cfg.Webhook)
@@ -102,4 +102,30 @@ func main() {
 	}
 
 	log.Info().Msg("统一服务器已关闭")
+}
+
+// setupLogger 设置日志配置
+func setupLogger(cfg *config.Config) {
+	// 根据环境设置日志格式
+	if cfg.IsProduction() {
+		// 生产环境使用 JSON 格式
+		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	} else {
+		// 开发环境使用控制台格式
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+
+	// 设置日志级别
+	switch cfg.Log.Level {
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
 }
