@@ -103,3 +103,4 @@ LICENSE
 # ==================================
 cmd/rest-server
 proto/*.proto
+bak
