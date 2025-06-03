@@ -51,7 +51,7 @@ FROM alpine:latest AS final
 RUN --mount=type=cache,target=/var/cache/apk \
     apk --update add \
     ca-certificates \
-    tzdata &&
+    tzdata && \
     update-ca-certificates
 
 # Create a non-privileged user that the app will run under.
