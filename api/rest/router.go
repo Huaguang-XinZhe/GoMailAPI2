@@ -4,6 +4,7 @@ import (
 	"gomailapi2/api/rest/handler"
 	"gomailapi2/internal/manager"
 	"gomailapi2/internal/provider/token"
+	"gomailapi2/internal/service"
 
 	"os"
 
@@ -11,7 +12,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.NotificationManager, imapManager *manager.ImapSubscriptionManager) *gin.Engine {
+func SetupRouter(
+	tokenProvider *token.TokenProvider,
+	protocolService *service.ProtocolService,
+	nfManager *manager.NotificationManager,
+	imapManager *manager.ImapSubscriptionManager,
+) *gin.Engine {
 	// 检查环境变量，如果设置了 GIN_MODE=release 或者 GOMAILAPI_ENV=production，则设置为 release 模式
 	if os.Getenv("GIN_MODE") == "release" || os.Getenv("GOMAILAPI_ENV") == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -36,6 +42,8 @@ func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.Notifica
 		apiGroup.POST("/mail/junk/latest", handler.HandleUnifiedJunkMail(tokenProvider))
 		// 统一邮件订阅路由（支持 IMAP 和 Graph 协议）
 		apiGroup.POST("/subscribe-sse", handler.HandleUnifiedSubscribeSSE(tokenProvider, nfManager, imapManager))
+		// 检测协议类型
+		apiGroup.POST("/detect-protocol", handler.HandleDetectProtocolType(protocolService))
 	}
 
 	// Token 相关端点
@@ -45,6 +53,7 @@ func SetupRouter(tokenProvider *token.TokenProvider, nfManager *manager.Notifica
 		tokenGroup.POST("/refresh", handler.HandleRefreshToken(tokenProvider))
 		// 批量刷新 Token
 		tokenGroup.POST("/batch/refresh", handler.HandleBatchRefreshToken(tokenProvider))
+
 	}
 
 	// Graph API 相关路由

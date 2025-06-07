@@ -26,16 +26,16 @@ type TokenResponse struct {
 func GetAccessToken(mailInfo *types.MailInfo) (string, error) {
 	switch mailInfo.ProtoType {
 	case types.ProtocolTypeIMAP:
-		// IMAP: accessToken 过期 -> getTokens(includeScope=false)，取 accessToken
-		tokenResp, err := getTokens(mailInfo, false)
+		// IMAP: accessToken 过期 -> GetTokensWithScope(includeScope=false)，取 accessToken
+		tokenResp, err := GetTokensWithScope(mailInfo, false)
 		if err != nil {
 			return "", err
 		}
 		return tokenResp.AccessToken, nil
 
 	case types.ProtocolTypeGraph:
-		// Graph: accessToken 过期 -> getTokens(includeScope=true)，取 accessToken
-		tokenResp, err := getTokens(mailInfo, true)
+		// Graph: accessToken 过期 -> GetTokensWithScope(includeScope=true)，取 accessToken
+		tokenResp, err := GetTokensWithScope(mailInfo, true)
 		if err != nil {
 			return "", err
 		}
@@ -48,8 +48,8 @@ func GetAccessToken(mailInfo *types.MailInfo) (string, error) {
 
 // GetRefreshToken 获取 refreshToken
 func GetRefreshToken(mailInfo *types.MailInfo) (string, error) {
-	// 不论 IMAP 还是 Graph，只要刷新都是 getTokens(includeScope=false)，取 refreshToken
-	tokenResp, err := getTokens(mailInfo, false)
+	// 不论 IMAP 还是 Graph，只要刷新都是 GetTokensWithScope(includeScope=false)，取 refreshToken
+	tokenResp, err := GetTokensWithScope(mailInfo, false)
 	if err != nil {
 		return "", err
 	}
@@ -60,8 +60,8 @@ func GetRefreshToken(mailInfo *types.MailInfo) (string, error) {
 func GetBothTokens(mailInfo *types.MailInfo) (string, string, error) {
 	switch mailInfo.ProtoType {
 	case types.ProtocolTypeIMAP:
-		// IMAP: 要求刷新，同时获取新邮件/监听 -> 同时获取 accessToken 和 refreshToken（getTokens(includeScope=false)）
-		tokenResp, err := getTokens(mailInfo, false)
+		// IMAP: 要求刷新，同时获取新邮件/监听 -> 同时获取 accessToken 和 refreshToken（GetTokensWithScope(includeScope=false)）
+		tokenResp, err := GetTokensWithScope(mailInfo, false)
 		if err != nil {
 			return "", "", err
 		}
@@ -89,13 +89,13 @@ func getBothTokensConcurrently(mailInfo *types.MailInfo) (string, string, error)
 
 	// 并发获取 accessToken（带 scope）
 	go func() {
-		token, err := getTokens(mailInfo, true)
+		token, err := GetTokensWithScope(mailInfo, true)
 		accessTokenCh <- tokenResult{token: token.AccessToken, err: err}
 	}()
 
 	// 并发获取 refreshToken（不带 scope）
 	go func() {
-		token, err := getTokens(mailInfo, false)
+		token, err := GetTokensWithScope(mailInfo, false)
 		refreshTokenCh <- tokenResult{token: token.RefreshToken, err: err}
 	}()
 
@@ -115,8 +115,8 @@ func getBothTokensConcurrently(mailInfo *types.MailInfo) (string, string, error)
 	return accessResult.token, refreshResult.token, nil
 }
 
-// getTokens 带 scope 返回 graph api 所需的 accessToken，不带，返回 refreshToken 和 IMAP API 所需的 accessToken（Graph API 无法使用）
-func getTokens(mailInfo *types.MailInfo, includeScope bool) (*TokenResponse, error) {
+// GetTokensWithScope 带 scope 返回 graph api 所需的 accessToken，不带，返回 refreshToken 和 IMAP API 所需的 accessToken（Graph API 无法使用）
+func GetTokensWithScope(mailInfo *types.MailInfo, includeScope bool) (*TokenResponse, error) {
 	// 目前只处理微软邮箱
 	if mailInfo.ServiceProvider != types.ServiceProviderMicrosoft {
 		return nil, fmt.Errorf("暂时只支持微软邮箱，不支持: %s", mailInfo.ServiceProvider)

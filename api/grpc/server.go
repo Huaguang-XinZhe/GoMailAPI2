@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gomailapi2/internal/manager"
 	"gomailapi2/internal/provider/token"
+	"gomailapi2/internal/service"
 	pb "gomailapi2/proto/pb"
 	"net"
 
@@ -15,22 +16,25 @@ import (
 // MailServer gRPC 邮件服务器
 type MailServer struct {
 	pb.UnimplementedMailServiceServer
-	tokenProvider *token.TokenProvider
-	nfManager     *manager.NotificationManager
-	imapManager   *manager.ImapSubscriptionManager
-	server        *grpc.Server
+	tokenProvider   *token.TokenProvider
+	protocolService *service.ProtocolService
+	nfManager       *manager.NotificationManager
+	imapManager     *manager.ImapSubscriptionManager
+	server          *grpc.Server
 }
 
 // NewMailServer 创建新的邮件服务器
 func NewMailServer(
 	tokenProvider *token.TokenProvider,
+	protocolService *service.ProtocolService,
 	nfManager *manager.NotificationManager,
 	imapManager *manager.ImapSubscriptionManager,
 ) *MailServer {
 	return &MailServer{
-		tokenProvider: tokenProvider,
-		nfManager:     nfManager,
-		imapManager:   imapManager,
+		tokenProvider:   tokenProvider,
+		protocolService: protocolService,
+		nfManager:       nfManager,
+		imapManager:     imapManager,
 	}
 }
 

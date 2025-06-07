@@ -54,3 +54,13 @@ type BatchRefreshResult struct {
 	NewRefreshToken string `json:"newRefreshToken,omitempty"` // 新的 refreshToken
 	Error           string `json:"error,omitempty"`           // 错误信息（失败时）
 }
+
+// DetectProtocolTypeRequest 检测协议类型请求
+type DetectProtocolTypeRequest struct {
+	MailInfo *types.MailInfo `json:"mailInfo"` // 邮箱信息（不包含 protoType）
+}
+
+// DetectProtocolTypeResponse 检测协议类型响应
+type DetectProtocolTypeResponse struct {
+	ProtoType types.ProtocolType `json:"protoType"` // 检测到的协议类型
+}

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gomailapi2/internal/cache/factory"
 	"gomailapi2/internal/cache/tokencache"
-	"gomailapi2/internal/config"
 	"gomailapi2/internal/origin/auth"
 	"gomailapi2/internal/types"
 
@@ -19,15 +17,10 @@ type TokenProvider struct {
 }
 
 // NewTokenProvider 创建新的 TokenProvider 实例
-func NewTokenProvider(cacheConfig config.CacheConfig) (*TokenProvider, error) {
-	cacheInstance, err := factory.NewCache(cacheConfig)
-	if err != nil {
-		return nil, fmt.Errorf("创建缓存实例失败: %w", err)
-	}
-
+func NewTokenProvider(cache tokencache.Cache) *TokenProvider {
 	return &TokenProvider{
-		cache: cacheInstance,
-	}, nil
+		cache: cache,
+	}
 }
 
 // GetAccessToken 获取 access token（优先从缓存获取）

@@ -6,9 +6,11 @@ import (
 
 	"gomailapi2/api/common"
 	"gomailapi2/api/rest"
+	"gomailapi2/internal/cache/factory"
 	"gomailapi2/internal/config"
 	"gomailapi2/internal/manager"
 	"gomailapi2/internal/provider/token"
+	"gomailapi2/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -35,15 +37,24 @@ func main() {
 	imapManager := manager.NewImapSubscriptionManager()
 	log.Info().Msg("IMAP 订阅管理器初始化完成")
 
-	// 初始化 TokenProvider
-	tokenProvider, err := token.NewTokenProvider(cfg.Cache)
+	// 初始化缓存实例
+	cacheInstance, err := factory.NewCache(cfg.Cache)
 	if err != nil {
-		log.Fatal().Err(err).Msg("初始化 TokenProvider 失败")
+		log.Fatal().Err(err).Msg("初始化缓存失败")
 	}
-	defer tokenProvider.Close()
+	defer cacheInstance.Close()
+	log.Info().Msg("缓存初始化完成")
+
+	// 初始化 TokenProvider
+	tokenProvider := token.NewTokenProvider(cacheInstance)
+	log.Info().Msg("TokenProvider 初始化完成")
+
+	// 初始化 ProtocolService
+	protocolService := service.NewProtocolService(cacheInstance)
+	log.Info().Msg("协议检测服务初始化完成")
 
 	// 初始化路由
-	router := rest.SetupRouter(tokenProvider, notificationManager, imapManager)
+	router := rest.SetupRouter(tokenProvider, protocolService, notificationManager, imapManager)
 
 	// 启动服务器
 	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)

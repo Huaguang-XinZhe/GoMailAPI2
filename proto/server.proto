@@ -21,6 +21,9 @@ service MailService {
   
   // 批量刷新 Token
   rpc BatchRefreshToken(BatchRefreshTokenRequest) returns (BatchRefreshTokenResponse);
+  
+  // 检测协议类型
+  rpc DetectProtocolType(DetectProtocolTypeRequest) returns (DetectProtocolTypeResponse);
 }
 
 // 服务提供商类型
@@ -134,4 +137,14 @@ message BatchRefreshTokenResponse {
   int32 success_count = 1;
   int32 fail_count = 2;
   repeated BatchRefreshResult results = 3;
+}
+
+// 协议检测请求（对应 dto.DetectProtocolTypeRequest）
+message DetectProtocolTypeRequest {
+  MailInfo mail_info = 1; // 邮箱信息（不包含 protoType）
+}
+
+// 协议检测响应（对应 dto.DetectProtocolTypeResponse）
+message DetectProtocolTypeResponse {
+  ProtocolType proto_type = 1; // 检测到的协议类型
 }

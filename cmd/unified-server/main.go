@@ -12,9 +12,11 @@ import (
 	"gomailapi2/api/common"
 	"gomailapi2/api/grpc"
 	"gomailapi2/api/rest"
+	"gomailapi2/internal/cache/factory"
 	"gomailapi2/internal/config"
 	"gomailapi2/internal/manager"
 	"gomailapi2/internal/provider/token"
+	"gomailapi2/internal/service"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -32,12 +34,20 @@ func main() {
 
 	log.Info().Msg("启动统一邮件服务器 (gRPC + REST)")
 
-	// 初始化 token provider
-	tokenProvider, err := token.NewTokenProvider(cfg.Cache)
+	// 初始化缓存实例
+	cacheInstance, err := factory.NewCache(cfg.Cache)
 	if err != nil {
-		log.Fatal().Err(err).Msg("初始化 token provider 失败")
+		log.Fatal().Err(err).Msg("初始化缓存失败")
 	}
-	defer tokenProvider.Close()
+	defer cacheInstance.Close()
+	log.Info().Msg("缓存初始化完成")
+
+	// 初始化 token provider
+	tokenProvider := token.NewTokenProvider(cacheInstance)
+
+	// 初始化 protocol service
+	protocolService := service.NewProtocolService(cacheInstance)
+	log.Info().Msg("协议检测服务初始化完成")
 
 	// 初始化管理器 - 这里是关键，两个服务共享同一个实例
 	nfManager := manager.NewNotificationManager()
@@ -53,7 +63,7 @@ func main() {
 	grpcPort := cfg.Server.GrpcPort
 	log.Info().Int("port", grpcPort).Msg("启动 gRPC 服务器...")
 
-	mailServer := grpc.NewMailServer(tokenProvider, nfManager, imapManager)
+	mailServer := grpc.NewMailServer(tokenProvider, protocolService, nfManager, imapManager)
 
 	// 启动 gRPC 服务器（在 goroutine 中）
 	go func() {
@@ -65,7 +75,7 @@ func main() {
 	// 启动 REST 服务器（在 goroutine 中）
 	restServer := &http.Server{}
 
-	router := rest.SetupRouter(tokenProvider, nfManager, imapManager)
+	router := rest.SetupRouter(tokenProvider, protocolService, nfManager, imapManager)
 
 	restAddress := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	restServer.Addr = restAddress

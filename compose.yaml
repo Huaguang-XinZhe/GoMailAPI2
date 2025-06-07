@@ -18,7 +18,7 @@ services:
     volumes:
       - ./config.yaml:/config.yaml:ro # 挂载配置文件，只读
     environment:
-      - GOMAILAPI_WEBHOOK_BASE_URL=https://372151.xyz
+      - GOMAILAPI_WEBHOOK_BASE_URL=https://graph.mufengapp.cn
       - GOMAILAPI_ENV=production
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
