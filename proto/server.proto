@@ -24,6 +24,9 @@ service MailService {
   
   // 检测协议类型
   rpc DetectProtocolType(DetectProtocolTypeRequest) returns (DetectProtocolTypeResponse);
+  
+  // 批量检测协议类型
+  rpc BatchDetectProtocolType(BatchDetectProtocolTypeRequest) returns (BatchDetectProtocolTypeResponse);
 }
 
 // 服务提供商类型
@@ -147,4 +150,23 @@ message DetectProtocolTypeRequest {
 // 协议检测响应（对应 dto.DetectProtocolTypeResponse）
 message DetectProtocolTypeResponse {
   ProtocolType proto_type = 1; // 检测到的协议类型
+}
+
+// 批量检测协议类型请求（对应 dto.BatchDetectProtocolTypeRequest）
+message BatchDetectProtocolTypeRequest {
+  repeated MailInfo mail_infos = 1; // 需要检测的邮箱信息列表
+}
+
+// 批量检测协议类型结果项（对应 dto.BatchDetectProtocolTypeResult）
+message BatchDetectProtocolTypeResult {
+  string email = 1;                                    // 邮箱地址
+  ProtocolType proto_type = 2;                        // 检测到的协议类型（成功时）
+  optional string error = 3;                          // 错误信息（失败时）
+}
+
+// 批量检测协议类型响应（对应 dto.BatchDetectProtocolTypeResponse）
+message BatchDetectProtocolTypeResponse {
+  int32 success_count = 1;                            // 成功检测的数量
+  int32 fail_count = 2;                               // 失败检测的数量
+  repeated BatchDetectProtocolTypeResult results = 3; // 详细结果列表
 }

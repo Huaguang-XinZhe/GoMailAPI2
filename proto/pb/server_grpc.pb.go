@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MailService_GetLatestMail_FullMethodName      = "/MailService/GetLatestMail"
-	MailService_FindMail_FullMethodName           = "/MailService/FindMail"
-	MailService_GetJunkMail_FullMethodName        = "/MailService/GetJunkMail"
-	MailService_SubscribeMail_FullMethodName      = "/MailService/SubscribeMail"
-	MailService_RefreshToken_FullMethodName       = "/MailService/RefreshToken"
-	MailService_BatchRefreshToken_FullMethodName  = "/MailService/BatchRefreshToken"
-	MailService_DetectProtocolType_FullMethodName = "/MailService/DetectProtocolType"
+	MailService_GetLatestMail_FullMethodName           = "/MailService/GetLatestMail"
+	MailService_FindMail_FullMethodName                = "/MailService/FindMail"
+	MailService_GetJunkMail_FullMethodName             = "/MailService/GetJunkMail"
+	MailService_SubscribeMail_FullMethodName           = "/MailService/SubscribeMail"
+	MailService_RefreshToken_FullMethodName            = "/MailService/RefreshToken"
+	MailService_BatchRefreshToken_FullMethodName       = "/MailService/BatchRefreshToken"
+	MailService_DetectProtocolType_FullMethodName      = "/MailService/DetectProtocolType"
+	MailService_BatchDetectProtocolType_FullMethodName = "/MailService/BatchDetectProtocolType"
 )
 
 // MailServiceClient is the client API for MailService service.
@@ -48,6 +49,8 @@ type MailServiceClient interface {
 	BatchRefreshToken(ctx context.Context, in *BatchRefreshTokenRequest, opts ...grpc.CallOption) (*BatchRefreshTokenResponse, error)
 	// 检测协议类型
 	DetectProtocolType(ctx context.Context, in *DetectProtocolTypeRequest, opts ...grpc.CallOption) (*DetectProtocolTypeResponse, error)
+	// 批量检测协议类型
+	BatchDetectProtocolType(ctx context.Context, in *BatchDetectProtocolTypeRequest, opts ...grpc.CallOption) (*BatchDetectProtocolTypeResponse, error)
 }
 
 type mailServiceClient struct {
@@ -137,6 +140,16 @@ func (c *mailServiceClient) DetectProtocolType(ctx context.Context, in *DetectPr
 	return out, nil
 }
 
+func (c *mailServiceClient) BatchDetectProtocolType(ctx context.Context, in *BatchDetectProtocolTypeRequest, opts ...grpc.CallOption) (*BatchDetectProtocolTypeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BatchDetectProtocolTypeResponse)
+	err := c.cc.Invoke(ctx, MailService_BatchDetectProtocolType_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility.
@@ -157,6 +170,8 @@ type MailServiceServer interface {
 	BatchRefreshToken(context.Context, *BatchRefreshTokenRequest) (*BatchRefreshTokenResponse, error)
 	// 检测协议类型
 	DetectProtocolType(context.Context, *DetectProtocolTypeRequest) (*DetectProtocolTypeResponse, error)
+	// 批量检测协议类型
+	BatchDetectProtocolType(context.Context, *BatchDetectProtocolTypeRequest) (*BatchDetectProtocolTypeResponse, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -187,6 +202,9 @@ func (UnimplementedMailServiceServer) BatchRefreshToken(context.Context, *BatchR
 }
 func (UnimplementedMailServiceServer) DetectProtocolType(context.Context, *DetectProtocolTypeRequest) (*DetectProtocolTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DetectProtocolType not implemented")
+}
+func (UnimplementedMailServiceServer) BatchDetectProtocolType(context.Context, *BatchDetectProtocolTypeRequest) (*BatchDetectProtocolTypeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchDetectProtocolType not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 func (UnimplementedMailServiceServer) testEmbeddedByValue()                     {}
@@ -328,6 +346,24 @@ func _MailService_DetectProtocolType_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_BatchDetectProtocolType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchDetectProtocolTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).BatchDetectProtocolType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MailService_BatchDetectProtocolType_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).BatchDetectProtocolType(ctx, req.(*BatchDetectProtocolTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -358,6 +394,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DetectProtocolType",
 			Handler:    _MailService_DetectProtocolType_Handler,
+		},
+		{
+			MethodName: "BatchDetectProtocolType",
+			Handler:    _MailService_BatchDetectProtocolType_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

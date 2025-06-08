@@ -31,6 +31,17 @@ func protoProtocolTypeToTypes(protoType pb.ProtocolType) types.ProtocolType {
 	}
 }
 
+// typesToProtoProtocolType 将内部 ProtocolType 转换为 proto ProtocolType
+func typesToProtoProtocolType(protoType types.ProtocolType) pb.ProtocolType {
+	switch protoType {
+	case types.ProtocolTypeIMAP:
+		return pb.ProtocolType_IMAP
+	case types.ProtocolTypeGraph:
+		return pb.ProtocolType_GRAPH
+	}
+	return pb.ProtocolType_IMAP
+}
+
 // protoServiceProviderToTypes 将 proto ServiceProvider 转换为内部 ServiceProvider
 func protoServiceProviderToTypes(protoProvider pb.ServiceProvider) types.ServiceProvider {
 	switch protoProvider {

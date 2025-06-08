@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"gomailapi2/internal/types"
 	pb "gomailapi2/proto/pb"
 	"sync"
 
@@ -119,48 +118,5 @@ func (s *MailServer) BatchRefreshToken(ctx context.Context, req *pb.BatchRefresh
 		SuccessCount: successCount,
 		FailCount:    failCount,
 		Results:      results,
-	}, nil
-}
-
-// DetectProtocolType 检测协议类型
-func (s *MailServer) DetectProtocolType(ctx context.Context, req *pb.DetectProtocolTypeRequest) (*pb.DetectProtocolTypeResponse, error) {
-	// 验证请求
-	if req.MailInfo == nil {
-		return nil, status.Error(codes.InvalidArgument, "MailInfo 不能为空")
-	}
-
-	log.Info().
-		Str("email", req.MailInfo.Email).
-		Str("provider", req.MailInfo.ServiceProvider.String()).
-		Msg("gRPC 收到协议类型检测请求")
-
-	// 转换为内部类型
-	mailInfo := protoToMailInfo(req.MailInfo)
-
-	// 检测协议类型
-	result, err := s.protocolService.DetectProtocolType(mailInfo)
-	if err != nil {
-		log.Error().Err(err).Str("email", req.MailInfo.Email).Msg("协议类型检测失败")
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// 转换协议类型为 protobuf 枚举
-	var protoType pb.ProtocolType
-	switch result.ProtoType {
-	case types.ProtocolTypeIMAP:
-		protoType = pb.ProtocolType_IMAP
-	case types.ProtocolTypeGraph:
-		protoType = pb.ProtocolType_GRAPH
-	default:
-		protoType = pb.ProtocolType_IMAP // 默认值
-	}
-
-	log.Info().
-		Str("email", req.MailInfo.Email).
-		Str("detectedType", string(result.ProtoType)).
-		Msg("协议类型检测成功")
-
-	return &pb.DetectProtocolTypeResponse{
-		ProtoType: protoType,
 	}, nil
 }

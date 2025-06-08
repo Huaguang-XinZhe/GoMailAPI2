@@ -44,6 +44,8 @@ func SetupRouter(
 		apiGroup.POST("/subscribe-sse", handler.HandleUnifiedSubscribeSSE(tokenProvider, nfManager, imapManager))
 		// 检测协议类型
 		apiGroup.POST("/detect-protocol", handler.HandleDetectProtocolType(protocolService))
+		// 批量检测协议类型
+		apiGroup.POST("/batch/detect-protocol", handler.HandleBatchDetectProtocolType(protocolService))
 	}
 
 	// Token 相关端点

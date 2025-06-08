@@ -64,3 +64,22 @@ type DetectProtocolTypeRequest struct {
 type DetectProtocolTypeResponse struct {
 	ProtoType types.ProtocolType `json:"protoType"` // 检测到的协议类型
 }
+
+// BatchDetectProtocolTypeRequest 批量检测协议类型请求
+type BatchDetectProtocolTypeRequest struct {
+	MailInfos []*types.MailInfo `json:"mailInfos"` // 需要检测的邮箱信息列表
+}
+
+// BatchDetectProtocolTypeResult 批量检测协议类型结果项
+type BatchDetectProtocolTypeResult struct {
+	Email     string             `json:"email"`               // 邮箱地址
+	ProtoType types.ProtocolType `json:"protoType,omitempty"` // 检测到的协议类型（成功时）
+	Error     string             `json:"error,omitempty"`     // 错误信息（失败时）
+}
+
+// BatchDetectProtocolTypeResponse 批量检测协议类型的数据部分
+type BatchDetectProtocolTypeResponse struct {
+	SuccessCount int                             `json:"successCount"` // 成功检测的数量
+	FailCount    int                             `json:"failCount"`    // 失败检测的数量
+	Results      []BatchDetectProtocolTypeResult `json:"results"`      // 详细结果列表
+}

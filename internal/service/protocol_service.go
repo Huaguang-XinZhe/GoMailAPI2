@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"gomailapi2/api/rest/dto"
 	"gomailapi2/internal/cache/tokencache"
 	"gomailapi2/internal/origin/auth"
 	"gomailapi2/internal/types"
@@ -112,4 +113,81 @@ func (s *ProtocolService) DetectProtocolType(mailInfo *types.MailInfo) (*Protoco
 // isGraphScope 检查 scope 是否包含 Graph API 权限
 func (s *ProtocolService) isGraphScope(scope string) bool {
 	return strings.Contains(scope, "https://graph.microsoft.com/Mail.ReadWrite")
+}
+
+// BatchDetectProtocolType 批量检测邮件协议类型（并发处理）
+func (s *ProtocolService) BatchDetectProtocolType(mailInfos []*types.MailInfo) (*dto.BatchDetectProtocolTypeResponse, error) {
+	if len(mailInfos) == 0 {
+		return &dto.BatchDetectProtocolTypeResponse{
+			SuccessCount: 0,
+			FailCount:    0,
+			Results:      []dto.BatchDetectProtocolTypeResult{},
+		}, nil
+	}
+
+	log.Info().
+		Int("count", len(mailInfos)).
+		Msg("开始批量检测邮件协议类型")
+
+	// 创建结果通道
+	resultChan := make(chan dto.BatchDetectProtocolTypeResult, len(mailInfos))
+
+	// 使用 goroutine 并发处理每个邮箱
+	for _, mailInfo := range mailInfos {
+		go func(mi *types.MailInfo) {
+			result := dto.BatchDetectProtocolTypeResult{
+				Email: mi.Email,
+			}
+
+			// 检测协议类型
+			detectResult, err := s.DetectProtocolType(mi)
+			if err != nil {
+				result.Error = err.Error()
+				log.Error().
+					Err(err).
+					Str("email", mi.Email).
+					Msg("批量检测中单个邮箱协议类型检测失败")
+			} else {
+				result.ProtoType = detectResult.ProtoType
+				log.Info().
+					Str("email", mi.Email).
+					Str("detectedType", string(detectResult.ProtoType)).
+					Msg("批量检测中单个邮箱协议类型检测成功")
+			}
+
+			resultChan <- result
+		}(mailInfo)
+	}
+
+	// 收集所有结果
+	var results []dto.BatchDetectProtocolTypeResult
+	successCount := 0
+	failCount := 0
+
+	for range len(mailInfos) {
+		result := <-resultChan
+		results = append(results, result)
+
+		if result.Error == "" {
+			successCount++
+		} else {
+			failCount++
+		}
+	}
+
+	close(resultChan)
+
+	batchResult := &dto.BatchDetectProtocolTypeResponse{
+		SuccessCount: successCount,
+		FailCount:    failCount,
+		Results:      results,
+	}
+
+	log.Info().
+		Int("total", len(mailInfos)).
+		Int("success", successCount).
+		Int("fail", failCount).
+		Msg("批量检测邮件协议类型完成")
+
+	return batchResult, nil
 }

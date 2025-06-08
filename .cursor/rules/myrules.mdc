@@ -4,5 +4,5 @@ globs:
 alwaysApply: false
 ---
 - 把 interface{} 换成 any
-
 - 用 for range 代替传统的 for i
+- 不用写示例文档
