@@ -405,7 +405,8 @@ func (c *CommonImapClient) fetchLatestEmailFromFolder(folderName string) (*domai
 	}
 
 	if mbox.Messages == 0 {
-		return nil, fmt.Errorf("文件夹 %s 中没有邮件", folderName)
+		log.Printf("文件夹 %s 中没有邮件", folderName)
+		return nil, nil
 	}
 
 	return c.fetchEmailBySequenceNumber(mbox.Messages)
