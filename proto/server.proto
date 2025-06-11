@@ -46,7 +46,7 @@ message MailInfo {
   string email = 1;
   string client_id = 2;
   string refresh_token = 3;
-  ProtocolType proto_type = 4;
+  optional ProtocolType proto_type = 4;
   ServiceProvider service_provider = 5;
 }
 

@@ -206,7 +206,7 @@ func getEmailFromURL(ctx context.Context, accessToken, requestURL string) (*doma
 		}
 
 		if len(response.Value) == 0 {
-			return nil, errors.New("没有找到邮件")
+			return nil, nil // 没有找到邮件时返回 nil，不是错误
 		}
 
 		return convertToEmail(response.Value[0]), nil
@@ -218,7 +218,7 @@ func getEmailFromURL(ctx context.Context, accessToken, requestURL string) (*doma
 		}
 
 		if response.EmailData == nil {
-			return nil, errors.New("没有找到邮件")
+			return nil, nil // 没有找到邮件时返回 nil，不是错误
 		}
 
 		return convertToEmail(*response.EmailData), nil
