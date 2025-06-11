@@ -57,7 +57,7 @@ func (s *MailServer) GetLatestMail(ctx context.Context, req *pb.GetNewMailReques
 
 	// 构建响应
 	response := &pb.GetNewMailResponse{
-		Email: domainEmailToProto(email),
+		Email: domainEmailToProto(email), // 当 email 为 nil 时，domainEmailToProto 返回 nil
 	}
 
 	if req.RefreshNeeded && refreshToken != "" {
@@ -67,7 +67,11 @@ func (s *MailServer) GetLatestMail(ctx context.Context, req *pb.GetNewMailReques
 		response.RefreshToken = &refreshToken
 	}
 
-	log.Info().Str("email", req.MailInfo.Email).Msg("成功获取最新邮件")
+	if email != nil {
+		log.Info().Str("email", req.MailInfo.Email).Msg("成功获取最新邮件")
+	} else {
+		log.Info().Str("email", req.MailInfo.Email).Msg("没有找到最新邮件")
+	}
 	return response, nil
 }
 
@@ -115,7 +119,11 @@ func (s *MailServer) FindMail(ctx context.Context, req *pb.FindMailRequest) (*pb
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Info().Str("email", req.MailInfo.Email).Str("emailID", req.EmailId).Msg("成功查找邮件")
+	if email != nil {
+		log.Info().Str("email", req.MailInfo.Email).Str("emailID", req.EmailId).Msg("成功查找邮件")
+	} else {
+		log.Info().Str("email", req.MailInfo.Email).Str("emailID", req.EmailId).Msg("没有找到指定邮件")
+	}
 	return &pb.FindMailResponse{
 		Email: domainEmailToProto(email),
 	}, nil
@@ -161,7 +169,11 @@ func (s *MailServer) GetJunkMail(ctx context.Context, req *pb.GetNewJunkMailRequ
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Info().Str("email", req.MailInfo.Email).Msg("成功获取垃圾邮件")
+	if email != nil {
+		log.Info().Str("email", req.MailInfo.Email).Msg("成功获取垃圾邮件")
+	} else {
+		log.Info().Str("email", req.MailInfo.Email).Msg("没有找到垃圾邮件")
+	}
 	return &pb.GetNewJunkMailResponse{
 		Email: domainEmailToProto(email),
 	}, nil

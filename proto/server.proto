@@ -46,7 +46,7 @@ message MailInfo {
   string email = 1;
   string client_id = 2;
   string refresh_token = 3;
-  optional ProtocolType proto_type = 4;
+  ProtocolType proto_type = 4;
   ServiceProvider service_provider = 5;
 }
 
@@ -74,7 +74,7 @@ message GetNewMailRequest {
 
 // 获取最新邮件响应
 message GetNewMailResponse {
-  Email email = 1;
+  optional Email email = 1; // 没有找到邮件时为空
   optional string refresh_token = 2; // 当 refresh_needed=true 时返回
 }
 
@@ -86,7 +86,7 @@ message FindMailRequest {
 
 // 查找邮件响应
 message FindMailResponse {
-  Email email = 1;
+  optional Email email = 1; // 没有找到邮件时为空
 }
 
 // 获取垃圾邮件请求（对应 dto.GetNewJunkMailRequest）
@@ -96,7 +96,7 @@ message GetNewJunkMailRequest {
 
 // 获取垃圾邮件响应
 message GetNewJunkMailResponse {
-  Email email = 1;
+  optional Email email = 1; // 没有找到邮件时为空
 }
 
 // 邮件订阅请求（对应 dto.SubscribeMailRequest）
