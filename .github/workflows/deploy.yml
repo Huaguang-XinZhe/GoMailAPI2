@@ -52,7 +52,7 @@ jobs:
             docker compose -f compose.prod.yaml down
 
             # 移除旧镜像（可选，节省空间）
-            docker image prune -f
+            docker image prune -a -f
 
             # 拉取最新镜像并启动服务
             docker compose -f compose.prod.yaml pull

@@ -40,7 +40,7 @@ docker compose -f "$COMPOSE_FILE" down
 
 # 清理旧镜像（释放空间）
 echo "🧹 清理旧镜像..."
-docker image prune -f
+docker image prune -a -f
 
 # 拉取最新镜像
 echo "📥 拉取最新镜像..."
