@@ -15,6 +15,7 @@ type FindEmailResponse struct {
 
 // EmailData 表示从 Microsoft Graph API 返回的单个邮件数据
 type EmailData struct {
+	ID               string `json:"id"`
 	Subject          string `json:"subject"`
 	ReceivedDateTime string `json:"receivedDateTime"`
 	BodyPreview      string `json:"bodyPreview"`

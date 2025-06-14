@@ -9,6 +9,7 @@ type EmailAddress struct {
 
 // Email 邮件实体（核心业务模型）
 type Email struct {
+	ID      string        `json:"id"`
 	Subject string        `json:"subject"`
 	From    *EmailAddress `json:"from"`
 	To      *EmailAddress `json:"to"`

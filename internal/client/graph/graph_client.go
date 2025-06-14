@@ -233,6 +233,7 @@ func convertToEmail(emailData EmailData) *domain.Email {
 	}
 
 	return &domain.Email{
+		ID:      emailData.ID,
 		Subject: emailData.Subject,
 		From:    utils.CleanEmailAddress(&emailData.From.EmailAddress),
 		To:      utils.CleanEmailAddress(toRecipient),

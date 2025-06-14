@@ -8,6 +8,7 @@ import (
 	"gomailapi2/internal/utils"
 	"io"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -459,9 +460,11 @@ func parseMail(message *imap.Message, section *imap.BodySectionName) (*domain.Em
 	var from, to *domain.EmailAddress
 	var subject string
 
-	// // 记录 ID
-	// messageID := header.Get("Message-ID")
-	// log.Printf("邮件 ID: %s", messageID)
+	// 记录 ID
+	messageID := header.Get("Message-ID")
+	// 去掉两端的尖括号
+	messageID = strings.Trim(messageID, "<>")
+	log.Printf("邮件 ID: %s", messageID)
 
 	if d, err := header.Date(); err != nil {
 		return nil, errors.New("获取邮件日期失败")
@@ -488,6 +491,7 @@ func parseMail(message *imap.Message, section *imap.BodySectionName) (*domain.Em
 	}
 
 	email := &domain.Email{
+		ID:      messageID,
 		Date:    date,
 		From:    from,
 		To:      to,
