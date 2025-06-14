@@ -58,12 +58,13 @@ message EmailAddress {
 
 // 邮件实体（对应 domain.Email）
 message Email {
-  string subject = 1;
-  EmailAddress from = 2;
-  EmailAddress to = 3;
-  string date = 4;
-  string text = 5;
-  string html = 6;
+  string id = 1;
+  string subject = 2;
+  EmailAddress from = 3;
+  EmailAddress to = 4;
+  string date = 5;
+  string text = 6;
+  string html = 7;
 }
 
 // 获取最新邮件请求（对应 dto.GetNewMailRequest）

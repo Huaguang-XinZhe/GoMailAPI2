@@ -61,6 +61,7 @@ func domainEmailToProto(email *domain.Email) *pb.Email {
 	}
 
 	result := &pb.Email{
+		Id:      email.ID,
 		Subject: email.Subject,
 		Date:    email.Date,
 		Text:    email.Text,
