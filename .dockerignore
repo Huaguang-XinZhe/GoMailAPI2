@@ -101,6 +101,7 @@ LICENSE
 # ==================================
 # 特定于项目的文件
 # ==================================
-cmd/rest-server
+# cmd/rest-server
+cmd/unified-server
 proto/*.proto
 bak
