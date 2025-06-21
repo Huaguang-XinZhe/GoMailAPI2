@@ -33,19 +33,19 @@ func HandleUnifiedJunkMail(tokenProvider *token.TokenProvider) gin.HandlerFunc {
 
 		log.Info().
 			Str("email", request.MailInfo.Email).
-			Str("protocol", string(request.MailInfo.ProtoType)).
+			Str("protocol", string(request.MailInfo.ProtocolType)).
 			Str("provider", string(request.MailInfo.ServiceProvider)).
 			Msg("收到获取垃圾邮件请求")
 
 		// 根据协议类型处理请求
-		switch request.MailInfo.ProtoType {
+		switch request.MailInfo.ProtocolType {
 		case types.ProtocolTypeGraph:
 			handleGraphJunkMail(c, request, tokenProvider)
 		case types.ProtocolTypeIMAP:
 			handleImapJunkMail(c, request, tokenProvider)
 		default:
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "不支持的协议类型: " + string(request.MailInfo.ProtoType),
+				"error": "不支持的协议类型: " + string(request.MailInfo.ProtocolType),
 			})
 		}
 	}

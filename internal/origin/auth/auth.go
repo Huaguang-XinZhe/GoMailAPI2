@@ -24,7 +24,7 @@ type TokenResponse struct {
 
 // GetAccessToken 获取 accessToken
 func GetAccessToken(mailInfo *types.MailInfo) (string, error) {
-	switch mailInfo.ProtoType {
+	switch mailInfo.ProtocolType {
 	case types.ProtocolTypeIMAP:
 		// IMAP: accessToken 过期 -> GetTokensWithScope(includeScope=false)，取 accessToken
 		tokenResp, err := GetTokensWithScope(mailInfo, false)
@@ -42,7 +42,7 @@ func GetAccessToken(mailInfo *types.MailInfo) (string, error) {
 		return tokenResp.AccessToken, nil
 
 	default:
-		return "", fmt.Errorf("不支持的协议类型: %s", mailInfo.ProtoType)
+		return "", fmt.Errorf("不支持的协议类型: %s", mailInfo.ProtocolType)
 	}
 }
 
@@ -58,7 +58,7 @@ func GetRefreshToken(mailInfo *types.MailInfo) (string, error) {
 
 // GetBothTokens 同时获取 accessToken 和 refreshToken
 func GetBothTokens(mailInfo *types.MailInfo) (string, string, error) {
-	switch mailInfo.ProtoType {
+	switch mailInfo.ProtocolType {
 	case types.ProtocolTypeIMAP:
 		// IMAP: 要求刷新，同时获取新邮件/监听 -> 同时获取 accessToken 和 refreshToken（GetTokensWithScope(includeScope=false)）
 		tokenResp, err := GetTokensWithScope(mailInfo, false)
@@ -72,7 +72,7 @@ func GetBothTokens(mailInfo *types.MailInfo) (string, string, error) {
 		return getBothTokensConcurrently(mailInfo)
 
 	default:
-		return "", "", fmt.Errorf("不支持的协议类型: %s", mailInfo.ProtoType)
+		return "", "", fmt.Errorf("不支持的协议类型: %s", mailInfo.ProtocolType)
 	}
 }
 

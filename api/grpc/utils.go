@@ -14,7 +14,7 @@ func protoToMailInfo(protoMailInfo *pb.MailInfo) *types.MailInfo {
 		Email:           protoMailInfo.Email,
 		ClientID:        protoMailInfo.ClientId,
 		RefreshToken:    protoMailInfo.RefreshToken,
-		ProtoType:       protoProtocolTypeToTypes(protoMailInfo.ProtoType),
+		ProtocolType:    protoProtocolTypeToTypes(protoMailInfo.ProtoType),
 		ServiceProvider: protoServiceProviderToTypes(protoMailInfo.ServiceProvider),
 	}
 }

@@ -27,7 +27,7 @@ func NewTokenProvider(cache tokencache.Cache) *TokenProvider {
 func (p *TokenProvider) GetAccessToken(mailInfo *types.MailInfo) (string, error) {
 	log.Debug().
 		Str("email", mailInfo.Email).
-		Str("protocol", string(mailInfo.ProtoType)).
+		Str("protocol", string(mailInfo.ProtocolType)).
 		Msg("开始获取 access token")
 
 	// 1. 尝试从缓存获取
@@ -96,7 +96,7 @@ func (p *TokenProvider) GetRefreshToken(mailInfo *types.MailInfo) (string, error
 func (p *TokenProvider) GetBothTokens(mailInfo *types.MailInfo) (string, string, error) {
 	log.Debug().
 		Str("email", mailInfo.Email).
-		Str("protocol", string(mailInfo.ProtoType)).
+		Str("protocol", string(mailInfo.ProtocolType)).
 		Msg("开始同时获取 access token 和 refresh token")
 
 	// 直接调用原始数据层获取两个 token

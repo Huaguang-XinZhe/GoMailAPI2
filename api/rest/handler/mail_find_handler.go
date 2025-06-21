@@ -39,20 +39,20 @@ func HandleUnifiedFindMail(tokenProvider *token.TokenProvider) gin.HandlerFunc {
 
 		log.Info().
 			Str("email", request.MailInfo.Email).
-			Str("protocol", string(request.MailInfo.ProtoType)).
+			Str("protocol", string(request.MailInfo.ProtocolType)).
 			Str("provider", string(request.MailInfo.ServiceProvider)).
 			Str("emailID", emailID).
 			Msg("收到查找邮件请求")
 
 		// 根据协议类型处理请求
-		switch request.MailInfo.ProtoType {
+		switch request.MailInfo.ProtocolType {
 		case types.ProtocolTypeGraph:
 			handleGraphFindMail(c, request, tokenProvider, emailID)
 		case types.ProtocolTypeIMAP:
 			handleImapFindMail(c, request, tokenProvider, emailID)
 		default:
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "不支持的协议类型: " + string(request.MailInfo.ProtoType),
+				"error": "不支持的协议类型: " + string(request.MailInfo.ProtocolType),
 			})
 		}
 	}

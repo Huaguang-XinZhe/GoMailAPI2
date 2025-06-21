@@ -15,7 +15,7 @@ import (
 
 // ProtocolDetectResult 协议检测结果
 type ProtocolDetectResult struct {
-	ProtoType types.ProtocolType `json:"protoType"` // 检测到的协议类型
+	ProtocolType types.ProtocolType `json:"protocolType"` // 检测到的协议类型
 }
 
 // ProtocolService 协议检测服务
@@ -98,7 +98,7 @@ func (s *ProtocolService) DetectProtocolType(mailInfo *types.MailInfo) (*Protoco
 	}
 
 	result := &ProtocolDetectResult{
-		ProtoType: detectedType,
+		ProtocolType: detectedType,
 	}
 
 	log.Info().
@@ -148,10 +148,10 @@ func (s *ProtocolService) BatchDetectProtocolType(mailInfos []*types.MailInfo) (
 					Str("email", mi.Email).
 					Msg("批量检测中单个邮箱协议类型检测失败")
 			} else {
-				result.ProtoType = detectResult.ProtoType
+				result.ProtocolType = detectResult.ProtocolType
 				log.Info().
 					Str("email", mi.Email).
-					Str("detectedType", string(detectResult.ProtoType)).
+					Str("detectedType", string(detectResult.ProtocolType)).
 					Msg("批量检测中单个邮箱协议类型检测成功")
 			}
 

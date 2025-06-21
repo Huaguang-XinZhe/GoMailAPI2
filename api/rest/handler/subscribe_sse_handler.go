@@ -35,7 +35,7 @@ func HandleUnifiedSubscribeSSE(
 
 		log.Info().
 			Str("email", request.MailInfo.Email).
-			Str("protocol", string(request.MailInfo.ProtoType)).
+			Str("protocol", string(request.MailInfo.ProtocolType)).
 			Bool("refreshNeeded", request.RefreshNeeded).
 			Msg("收到统一订阅请求")
 
@@ -48,16 +48,16 @@ func HandleUnifiedSubscribeSSE(
 		}
 
 		// 根据协议类型选择处理方式
-		switch request.MailInfo.ProtoType {
+		switch request.MailInfo.ProtocolType {
 		case types.ProtocolTypeIMAP:
 			handleImapSubscription(c, request, accessToken, refreshToken, imapManager)
 		case types.ProtocolTypeGraph:
 			handleGraphSubscription(c, request, accessToken, refreshToken, nfManager)
 		default:
 			log.Error().
-				Str("protocol", string(request.MailInfo.ProtoType)).
+				Str("protocol", string(request.MailInfo.ProtocolType)).
 				Msg("不支持的协议类型")
-			sendSSEError(c, "不支持的协议类型: "+string(request.MailInfo.ProtoType))
+			sendSSEError(c, "不支持的协议类型: "+string(request.MailInfo.ProtocolType))
 		}
 	}
 }

@@ -33,11 +33,11 @@ func (s *MailServer) DetectProtocolType(ctx context.Context, req *pb.DetectProto
 	}
 
 	// 转换协议类型为 protobuf 枚举
-	protoType := typesToProtoProtocolType(result.ProtoType)
+	protoType := typesToProtoProtocolType(result.ProtocolType)
 
 	log.Info().
 		Str("email", req.MailInfo.Email).
-		Str("detectedType", string(result.ProtoType)).
+		Str("detectedType", string(result.ProtocolType)).
 		Msg("协议类型检测成功")
 
 	return &pb.DetectProtocolTypeResponse{
@@ -82,7 +82,7 @@ func (s *MailServer) BatchDetectProtocolType(ctx context.Context, req *pb.BatchD
 			pbResult.Error = &item.Error
 		} else {
 			// 转换协议类型为 protobuf 枚举
-			pbResult.ProtoType = typesToProtoProtocolType(item.ProtoType)
+			pbResult.ProtoType = typesToProtoProtocolType(item.ProtocolType)
 		}
 
 		pbResults = append(pbResults, pbResult)

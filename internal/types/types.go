@@ -4,16 +4,16 @@ package types
 type ServiceProvider string
 
 const (
-	ServiceProviderMicrosoft ServiceProvider = "microsoft"
-	ServiceProviderGoogle    ServiceProvider = "google"
+	ServiceProviderMicrosoft ServiceProvider = "MICROSOFT"
+	ServiceProviderGoogle    ServiceProvider = "GOOGLE"
 )
 
 // ProtocolType 协议类型
 type ProtocolType string
 
 const (
-	ProtocolTypeIMAP  ProtocolType = "imap"
-	ProtocolTypeGraph ProtocolType = "graph"
+	ProtocolTypeIMAP  ProtocolType = "IMAP"
+	ProtocolTypeGraph ProtocolType = "GRAPH"
 )
 
 // MailInfo 邮件信息
@@ -21,6 +21,6 @@ type MailInfo struct {
 	Email           string          `json:"email"`
 	ClientID        string          `json:"clientId"`
 	RefreshToken    string          `json:"refreshToken"`
-	ProtoType       ProtocolType    `json:"protoType"`
+	ProtocolType    ProtocolType    `json:"protocolType"`
 	ServiceProvider ServiceProvider `json:"serviceProvider"`
 }

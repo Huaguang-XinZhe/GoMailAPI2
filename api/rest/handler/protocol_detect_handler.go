@@ -40,12 +40,12 @@ func HandleDetectProtocolType(protocolService *service.ProtocolService) gin.Hand
 
 		// 构建响应
 		response := dto.DetectProtocolTypeResponse{
-			ProtoType: result.ProtoType,
+			ProtocolType: result.ProtocolType,
 		}
 
 		log.Info().
 			Str("email", request.MailInfo.Email).
-			Str("detectedType", string(result.ProtoType)).
+			Str("detectedType", string(result.ProtocolType)).
 			Msg("协议类型检测成功")
 
 		c.JSON(http.StatusOK, response)
